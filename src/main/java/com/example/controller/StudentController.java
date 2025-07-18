@@ -47,11 +47,33 @@ public class StudentController {
         return "student-form";
     }
 
+    // New: Show form to update student
+    @GetMapping("/edit")
+    public String showEditForm(@RequestParam("id") Long id, Model model) {
+        Student student = studentService.getStudentById(id);
+        if (student == null) {
+            return "redirect:/students";
+        }
+        // Initialize courses list to size 3 if smaller
+        while (student.getCourses().size() < 3) {
+            student.getCourses().add(new com.example.model.Course());
+        }
+        // Initialize projects list to size 3 if smaller
+        while (student.getProjects().size() < 3) {
+            student.getProjects().add(new com.example.model.Project());
+        }
+        model.addAttribute("student", student);
+        return "student-form";
+    }
 
-    // 3. Save student
+    // 3. Save student (add or update)
     @PostMapping("/save")
     public String saveStudent(@ModelAttribute("student") Student student) {
-        studentService.registerStudent(student);
+        if (student.getId() != null) {
+            studentService.updateStudent(student);
+        } else {
+            studentService.registerStudent(student);
+        }
         return "redirect:/students";
     }
 
